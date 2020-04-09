@@ -1,0 +1,181 @@
+Public Type Edge
+src As Integer
+des As Integer
+wgt As Integer
+End Type
+
+Sub ClearSheets()
+    
+    Sheets("Template").Select
+    Range("A1:U22").Select
+    Selection.Copy
+    Sheets("Input").Select
+    Range("A1").Select
+    ActiveSheet.Paste
+    Range("A1").Select
+    
+    Sheets("Template").Select
+    Range("F8:P20").Select
+    Selection.Copy
+    Sheets("Output").Select
+    Range("F8").Select
+    ActiveSheet.Paste
+    
+    Sheets("Input").Select
+    Range("A1").Select
+
+End Sub
+
+Sub GenerateMatrix()
+
+Sheets("Input").Select
+
+Dim Num, v, Counter As Integer
+
+Num = InputBox("Enter the number of Nodes (<=8)")
+Range("L8").Value = Num
+
+Range("H11").Select
+
+For Counter = 1 To Num
+Selection.Value = Chr(64 + Counter)
+Selection.Offset(0, 1).Select
+Next Counter
+
+Range("G12").Select
+
+For Counter = 1 To Num
+Selection.Value = Chr(64 + Counter)
+Selection.Offset(1, 0).Select
+Next Counter
+
+Range("H12").Select
+
+For Counter = 1 To Num
+Selection.Value = "X"
+Selection.Offset(1, 1).Select
+Next Counter
+
+Sheets("Output").Select
+
+Range("H11").Select
+
+For Counter = 1 To Num
+Selection.Value = Chr(64 + Counter)
+Selection.Offset(0, 1).Select
+Next Counter
+
+Range("G12").Select
+
+For Counter = 1 To Num
+Selection.Value = Chr(64 + Counter)
+Selection.Offset(1, 0).Select
+Next Counter
+
+Range("H12").Select
+
+For Counter = 1 To Num
+Selection.Value = "X"
+Selection.Offset(1, 1).Select
+Next Counter
+
+Sheets("Input").Select
+
+Range("I12").Select
+
+End Sub
+
+Sub RunKruskal()
+
+Sheets("Input").Select
+
+Dim Num_Node, Num_Edge As Integer
+Num_Node = Range("L8").Value
+
+Range("L9").Value = 0
+
+Dim i, j, flag() As Integer
+ReDim flag(1 To Num_Node)
+
+For i = 1 To Num_Node
+flag(i) = i
+Next i
+
+Dim Sort_Edge() As Edge
+ReDim Sort_Edge(1 To 30)
+
+For i = 1 To Num_Node
+For j = i + 1 To Num_Node
+Range("G11").Select
+If Selection.Offset(i, j).Value <> 0 Then Range("L9").Value = Range("L9").Value + 1
+Range("G11").Select
+Num_Edge = Range("L9").Value
+If Selection.Offset(i, j).Value <> 0 Then Sort_Edge(Num_Edge).src = i
+Range("G11").Select
+If Selection.Offset(i, j).Value <> 0 Then Sort_Edge(Num_Edge).des = j
+Range("G11").Select
+If Selection.Offset(i, j).Value <> 0 Then Sort_Edge(Num_Edge).wgt = Selection.Offset(i, j).Value
+Next j
+Next i
+
+Dim Min As Edge
+
+For i = 1 To Num_Edge
+For j = 1 To Num_Edge - 1
+If (Sort_Edge(j).wgt > Sort_Edge(j + 1).wgt) Then
+    Min = Sort_Edge(j + 1)
+    Sort_Edge(j + 1) = Sort_Edge(j)
+    Sort_Edge(j) = Min
+End If
+Next j
+Next i
+
+Dim Source, Dest, Num_MST_Edge As Integer
+Num_MST_Edge = 0
+
+Dim Span_Tree() As Edge
+ReDim Span_Tree(1 To Num_Node - 1)
+
+For i = 1 To Num_Edge
+Source = Sort_Edge(i).src
+Dest = Sort_Edge(i).des
+If flag(Source) <> flag(Dest) And Num_MST_Edge < Num_Node - 1 Then
+    flag(Source) = 0
+    flag(Dest) = 0
+    Num_MST_Edge = Num_MST_Edge + 1
+    Span_Tree(Num_MST_Edge) = Sort_Edge(i)
+End If
+Next i
+
+Sheets("Input").Select
+Range("F8:P20").Select
+Selection.Copy
+Sheets("Output").Select
+Range("F8").Select
+ActiveSheet.Paste
+
+Range("L8").Value = Num_Node
+Range("I9").Value = "NUMBER OF EDGES IN MST"
+Range("L9").Value = Num_MST_Edge
+
+For i = 1 To Num_MST_Edge
+Range("G11").Select
+Selection.Offset(Span_Tree(i).src, Span_Tree(i).des).Select
+    With Selection.Font
+        .Size = 12
+        .Color = -11489280
+        .TintAndShade = 0
+    End With
+    Selection.Font.Bold = True
+Next i
+
+Range("F21").Select
+
+End Sub
+
+Sub GoToAlgo()
+
+Sheets("Algorithm").Select
+Range("E4").Select
+
+End Sub
